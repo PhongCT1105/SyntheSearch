@@ -1,11 +1,13 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Textarea } from "@/components/ui/textarea"
 import { ArrowUp } from "lucide-react";
 import { Button } from '@/components/ui/button';
+import axios from 'axios';
 
 const Home = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [message, setMessage] = useState('');
+  const [response, setResponse] = useState(null); // To store the response from the backend
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -24,11 +26,22 @@ const Home = () => {
     }
   }, [message]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (message.trim()) {
-      // Handle message submission here
-      console.log(message);
-      setMessage('');
+      try {
+        // make a POST request to the FastAPI backend
+        const res = await axios.post('http://127.0.0.1:8000/message', {
+          message: message.trim(),
+        });
+        console.log(res.data);
+        // set the response from the backend (for display or further use)
+        setResponse(res.data);
+
+        // clear the message field
+        setMessage('');
+      } catch (error) {
+        console.error("Error sending message to the backend:", error);
+      }
     }
   };
 
