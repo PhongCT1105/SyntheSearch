@@ -47,9 +47,9 @@ top_results = similarities[:5]
 # Display the results
 for result, similarity in top_results:
     print("Title:", result['metadata']['Title'])
-    print("Authors:", result['metadata']['Authors'])
-    print("Abstract:", result['metadata']['Abstract'])
-    print("Link:", result['metadata']['Link'])
-    print("Full Text:", result['metadata']['Full Text'])
+    # print("Authors:", result['metadata']['Authors'])
+    # print("Abstract:", result['metadata']['Abstract'])
+    # print("Link:", result['metadata']['Link'])
+    # print("Full Text:", result['metadata']['Full Text'])
     print("Similarity Score:", similarity)
     print("-" * 50)

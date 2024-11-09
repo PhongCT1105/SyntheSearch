@@ -2,6 +2,7 @@ import os
 import requests
 import json
 import uuid  # For generating unique random filenames
+import hashlib
 from dotenv import load_dotenv
 
 # Load the environment variables
@@ -25,14 +26,13 @@ def fetch_data(endpoint, params=None):
     headers = {
         'Authorization': f'Bearer {CORE_API_KEY}'
     }
-    response = requests.get(f'{BASE_URL}/{endpoint}', headers=headers, params=params)
-    
-    # Check if the request was successful
-    if response.status_code == 200:
+    try:
+        response = requests.get(f'{BASE_URL}/{endpoint}', headers=headers, params=params)
+        response.raise_for_status()  # Raise an error if the request was not successful
         return response.json()
-    else:
-        # Raise an error if the request was not successful
-        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching data from {endpoint}: {e}")
+        return {}
 
 def get_research_articles(query, num_articles=10):
     """
@@ -103,16 +103,23 @@ def get_research_articles(query, num_articles=10):
 
 def save_metadata_to_file(data):
     """
-    Saves the article metadata to a JSON file with a random unique filename.
+    Saves the article metadata to a JSON file with a unique filename based on the title and authors.
     
     Args:
         data (dict): The article metadata.
     """
-    # Generate a unique random filename
-    filename = f"raw_data/{uuid.uuid4()}.json"
-    with open(filename, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
-    print(f"Data saved to {filename}")
+    # Generate a unique hash based on the article title and authors
+    unique_str = f"{data['Title']}_{data['Authors']}"
+    filename_hash = hashlib.md5(unique_str.encode('utf-8')).hexdigest()  # Generate MD5 hash
+    filename = f"raw_data/{filename_hash}.json"
+    
+    # Save only if the file doesn't already exist to avoid duplicates
+    if not os.path.exists(filename):
+        with open(filename, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+        print(f"Data saved to {filename}")
+    else:
+        print(f"Duplicate article '{data['Title']}' already exists. Skipping save.")
 
 if __name__ == "__main__":
     os.makedirs('raw_data', exist_ok=True)  # Ensure raw_data directory exists
