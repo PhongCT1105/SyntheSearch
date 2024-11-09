@@ -2,8 +2,8 @@ import json
 import os
 import random
 import string
-from langchain_openai import OpenAIEmbeddings
 from dotenv import load_dotenv
+from langchain_openai import OpenAIEmbeddings
 import lancedb
 
 # Load environment variables
@@ -21,6 +21,11 @@ directory_path = "raw_data"
 
 # Initialize a list to hold all embedded data
 embedded_vectors = []
+
+# Connect to LanceDB and drop the table if it exists
+db = lancedb.connect("./lancedb")
+if "my_table" in db.table_names():
+    db.drop_table("my_table")
 
 # Function to generate a random string identifier
 def generate_random_id(length=8):
@@ -59,8 +64,7 @@ for file_name in os.listdir(directory_path):
             }
         })
 
-# Connect to LanceDB and create the table with all data
-db = lancedb.connect("./lancedb")
+# Create the table with all data
 tbl = db.create_table("my_table", data=embedded_vectors)
 
 print("Data from all JSON files in the 'raw_data' directory successfully stored in LanceDB with random IDs.")
