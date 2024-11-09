@@ -60,7 +60,8 @@ for file_name in os.listdir(directory_path):
                 "Year": article_metadata.get("Year", ""),
                 "Abstract": article_metadata.get("Abstract", ""),
                 "Keywords": article_metadata.get("Keywords", ""),
-                "Link": article_metadata.get("Link", "")
+                "Link": article_metadata.get("Link", ""),
+                "Full Text": article_metadata.get("Full Text", "")
             }
         })
 

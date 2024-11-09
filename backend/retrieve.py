@@ -42,12 +42,14 @@ for _, row in df.iterrows():
 
 # Sort by similarity in descending order and get the top 5 results
 similarities.sort(key=lambda x: x[1], reverse=True)
-top_results = similarities[:5]
+top_results = similarities[:1]
 
 # Display the results
 for result, similarity in top_results:
     print("Title:", result['metadata']['Title'])
     print("Authors:", result['metadata']['Authors'])
     print("Abstract:", result['metadata']['Abstract'])
+    print("Link:", result['metadata']['Link'])
+    print("Full Text:", result['metadata']['Full Text'])
     print("Similarity Score:", similarity)
     print("-" * 50)
