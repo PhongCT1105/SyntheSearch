@@ -38,6 +38,7 @@ const Home = () => {
         // Log the response data directly instead of the state
         console.log("Response data received:", res.data);
         setResponse(res.data); // This updates the state asynchronously
+        setMessage('');
       } catch (error) {
         console.error("Error sending message to the backend:", error);
       }
