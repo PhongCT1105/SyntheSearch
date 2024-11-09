@@ -25,11 +25,8 @@ table_name = "my_table"
 tbl = db.open_table(table_name)
 
 def retrieve_top_similar_results(input_text):
-    # Define the query text
-    query_text = "RAG models for text generation"
-
     # Embed the query text
-    query_embedding = embeddings_model.embed_query(query_text)
+    query_embedding = embeddings_model.embed_query(input_text)
 
     # Convert LanceDB table to a Pandas DataFrame
     df = tbl.to_pandas()
