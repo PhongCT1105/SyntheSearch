@@ -35,9 +35,9 @@ const Home = () => {
         const res = await axios.post('http://127.0.0.1:8000/message', {
           message: message.trim(),
         });
-        // Log the response data directly instead of the state
-        console.log("Response data received:", res.data);
+        
         setResponse(res.data); // This updates the state asynchronously
+        console.log(response);
         setMessage('');
       } catch (error) {
         console.error("Error sending message to the backend:", error);
