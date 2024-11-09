@@ -8,6 +8,7 @@ import axios from 'axios';
 const Home = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [message, setMessage] = useState('');
+  const [response, setResponse] = useState([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const navigate = useNavigate()
 
@@ -27,11 +28,24 @@ const Home = () => {
     }
   }, [message]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (message.trim()) {
-      console.log(message);
-      navigate('/responds', {state: {message}})
-      setMessage('');
+      try {
+        // make a POST request to the FastAPI backend
+        const res = await axios.post('http://127.0.0.1:8000/message', {
+          message: message.trim(),
+        });
+        console.log(res.data);
+        
+        // set the response from the backend (for display or further use)
+        setResponse(res.data);
+        //console.log(response);
+
+        // clear the message field
+        setMessage('');
+      } catch (error) {
+        console.error("Error sending message to the backend:", error);
+      }
     }
   };
 
