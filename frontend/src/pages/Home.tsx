@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Textarea } from "@/components/ui/textarea"
+import { ArrowUp } from "lucide-react";
 import { Button } from '@/components/ui/button';
 
 const Home = () => {
@@ -34,7 +35,7 @@ const Home = () => {
   return (
     <div className="w-full h-[80vh] bg-dark text-white flex items-center justify-center">
       <div
-        className={`w-full max-w-3xl px-4 ${
+        className={`w-full max-w-2xl px-4 ${
           isVisible ? 'opacity-100 transition-opacity duration-1000' : 'opacity-0'
         }`}
       >
@@ -59,11 +60,11 @@ const Home = () => {
             rows={1}
           />
           <Button 
-            className="absolute right-2 bottom-2 h-8 w-8 rounded-full p-0 hover:bg-slate-700"
+            className="absolute right-2 bottom-1 h-7 w-7 bg-white rounded-full p-0 hover:bg-slate-700"
             variant="ghost"
             onClick={handleSubmit}
           >
-            →
+            <ArrowUp className="h-4 w-4 text-black" />
           </Button>
         </div>
       </div>
