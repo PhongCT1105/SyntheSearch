@@ -2,13 +2,14 @@ import { useEffect, useState, useRef } from 'react';
 import { Textarea } from "@/components/ui/textarea"
 import { ArrowUp } from "lucide-react";
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const Home = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [message, setMessage] = useState('');
-  const [response, setResponse] = useState(null); // To store the response from the backend
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const navigate = useNavigate()
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -21,34 +22,23 @@ const Home = () => {
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
-      textarea.style.height = '20px';  // Reset height to get correct scrollHeight
+      textarea.style.height = '20px'; // Reset height to get correct scrollHeight
       textarea.style.height = `${textarea.scrollHeight}px`;
     }
   }, [message]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (message.trim()) {
-      try {
-        // make a POST request to the FastAPI backend
-        const res = await axios.post('http://127.0.0.1:8000/message', {
-          message: message.trim(),
-        });
-        console.log(res.data);
-        // set the response from the backend (for display or further use)
-        setResponse(res.data);
-
-        // clear the message field
-        setMessage('');
-      } catch (error) {
-        console.error("Error sending message to the backend:", error);
-      }
+      console.log(message);
+      navigate('/responds', {state: {message}})
+      setMessage('');
     }
   };
 
   return (
-    <div className="w-full h-[80vh] bg-dark text-white flex items-center justify-center">
+    <div className="fixed inset-0 flex flex-col items-center justify-center bg-dark text-white">
       <div
-        className={`w-full max-w-2xl px-4 ${
+        className={`w-full max-w-xl px-4 ${
           isVisible ? 'opacity-100 transition-opacity duration-1000' : 'opacity-0'
         }`}
       >
@@ -61,7 +51,7 @@ const Home = () => {
           <Textarea 
             ref={textareaRef}
             placeholder="Type your message here." 
-            className="min-h-[20px] max-h-[200px] rounded-3xl pr-14 resize-none overflow-y-auto"
+            className="min-h-[52px] max-h-[200px] rounded-3xl pr-14 resize-none overflow-y-auto py-3.5 leading-7"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={(e) => {
@@ -73,7 +63,7 @@ const Home = () => {
             rows={1}
           />
           <Button 
-            className="absolute right-2 bottom-1 h-7 w-7 bg-white rounded-full p-0 hover:bg-slate-700"
+            className="absolute right-3 bottom-3 h-7 w-7 bg-white rounded-full p-0 hover:bg-slate-700"
             variant="ghost"
             onClick={handleSubmit}
           >
