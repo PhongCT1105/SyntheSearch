@@ -24,32 +24,24 @@ db = lancedb.connect("./lancedb")
 table_name = "my_table"
 tbl = db.open_table(table_name)
 
-# Define the query text
-query_text = "RAG models for text generation"
+def retrieve_top_similar_results(input_text):
+    # Define the query text
+    query_text = "RAG models for text generation"
 
-# Embed the query text
-query_embedding = embeddings_model.embed_query(query_text)
+    # Embed the query text
+    query_embedding = embeddings_model.embed_query(query_text)
 
-# Convert LanceDB table to a Pandas DataFrame
-df = tbl.to_pandas()
+    # Convert LanceDB table to a Pandas DataFrame
+    df = tbl.to_pandas()
 
-# Calculate similarity between query and each embedding in the DataFrame
-similarities = []
-for _, row in df.iterrows():
-    embedding = row["embedding"]
-    similarity = cosine_similarity(query_embedding, embedding)
-    similarities.append((row, similarity))
+    # Calculate similarity between query and each embedding in the DataFrame
+    similarities = []
+    for _, row in df.iterrows():
+        embedding = row["embedding"]
+        similarity = cosine_similarity(query_embedding, embedding)
+        similarities.append((row, similarity))
 
-# Sort by similarity in descending order and get the top 5 results
-similarities.sort(key=lambda x: x[1], reverse=True)
-top_results = similarities[:5]
-
-# Display the results
-for result, similarity in top_results:
-    print("Title:", result['metadata']['Title'])
-    # print("Authors:", result['metadata']['Authors'])
-    # print("Abstract:", result['metadata']['Abstract'])
-    # print("Link:", result['metadata']['Link'])
-    # print("Full Text:", result['metadata']['Full Text'])
-    print("Similarity Score:", similarity)
-    print("-" * 50)
+    # Sort by similarity in descending order and get the top 5 results
+    similarities.sort(key=lambda x: x[1], reverse=True)
+    top_results = similarities[:5]
+    return top_results
