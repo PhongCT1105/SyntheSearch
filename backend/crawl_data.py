@@ -116,7 +116,7 @@ def save_metadata_to_file(data):
 
 if __name__ == "__main__":
     os.makedirs('raw_data', exist_ok=True)  # Ensure raw_data directory exists
-    queries = ["Python"]
+    queries = ["Economics", "Cloud Computing"]  # List of queries to search for
 
     for query in queries:
         articles = get_research_articles(query, num_articles=10)  # Retrieve 10 articles for each query

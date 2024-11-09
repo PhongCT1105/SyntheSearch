@@ -25,7 +25,7 @@ table_name = "my_table"
 tbl = db.open_table(table_name)
 
 # Define the query text
-query_text = "Large margin criterion for training neural language models."
+query_text = "RAG models for text generation"
 
 # Embed the query text
 query_embedding = embeddings_model.embed_query(query_text)
@@ -42,7 +42,7 @@ for _, row in df.iterrows():
 
 # Sort by similarity in descending order and get the top 5 results
 similarities.sort(key=lambda x: x[1], reverse=True)
-top_results = similarities[:1]
+top_results = similarities[:5]
 
 # Display the results
 for result, similarity in top_results:
