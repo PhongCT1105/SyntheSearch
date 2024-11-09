@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, StandardFonts } from 'pdf-lib';
 
 interface Paper {
   Title: string;
@@ -24,44 +24,11 @@ interface Paper {
 }
 
 import paperData from '../../article_metadata.json';
+import { Button } from '@/components/ui/button';
 
 const Table = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-
-  const generatePDF = async (paper: Paper) => {
-    const pdfDoc = await PDFDocument.create();
-    const fontSize = 12;
-    const lineSpacing = 16;
-    let page = pdfDoc.addPage([600, 800]);
-    let y = page.getHeight() - 50;
-
-    const addText = (text: string) => {
-      const lines = text.split('\n');
-      lines.forEach((line) => {
-        if (y < 50) {
-          page = pdfDoc.addPage([600, 800]);
-          y = page.getHeight() - 50;
-        }
-        page.drawText(line, { x: 50, y, size: fontSize });
-        y -= lineSpacing;
-      });
-    };
-
-    // Add paper details and full text to the PDF
-    addText(`Title: ${paper.Title}`);
-    addText(`Authors: ${paper.Authors}`);
-    addText(`Year: ${paper.Year}`);
-    addText(`Abstract: ${paper.Abstract}`);
-    addText(`Full Text: ${paper.FullText}`);
-
-    const pdfBytes = await pdfDoc.save();
-    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-    const pdfUrl = URL.createObjectURL(blob);
-
-    setPdfUrl(pdfUrl);
-    setIsModalOpen(true);
-  };
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -70,24 +37,23 @@ const Table = () => {
 
   return (
     <div>
-      <UiTable>
+      <UiTable className='w-[780px]'>
         <TableCaption>Research Paper Summary</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead>Title</TableHead>
+            <TableHead className='w-[300px]'>Title</TableHead>
+            <TableHead className='w-[200px]'>Authors</TableHead>
+            <TableHead>Publication Date</TableHead>
             <TableHead>Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           <TableRow>
             <TableCell>{paperData.Title}</TableCell>
-            <TableCell>
-              <button
-                onClick={() => generatePDF(paperData)}
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-              >
-                View PDF
-              </button>
+            <TableCell>{paperData.Authors}</TableCell>
+            <TableCell>{paperData.Year}</TableCell>
+            <TableCell className='w-[100px]'>
+              <Button>View Summarize </Button>
             </TableCell>
           </TableRow>
         </TableBody>
@@ -96,7 +62,7 @@ const Table = () => {
       {/* Modal */}
       {isModalOpen && pdfUrl && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-3xl w-full h-96 overflow-hidden relative">
+          <div className="bg-white p-6 rounded-lg max-w-3xl w-full h-full h-96 overflow-hidden relative">
             <button
               onClick={closeModal}
               className="absolute top-2 right-2 text-xl text-gray-500 hover:text-gray-800 focus:outline-none"
