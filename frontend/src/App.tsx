@@ -8,6 +8,7 @@ import About from './pages/About';
 import FeedBack from './pages/Feedback';
 import Responds from './pages/Responds';
 import Table from './pages/Table';
+// import ModalDetail from './pages/ModalDetail';
 
 function AppContent() {
   const location = useLocation();
@@ -24,6 +25,7 @@ function AppContent() {
         <Route path="/feedback" element={<FeedBack />} />
         <Route path="/responds" element={<Responds />} />
         <Route path="/table" element={<Table />} />
+        {/* <Route path="/modal" element={<ModalDetail />} /> */}
       </Routes>
     </div>
   );
