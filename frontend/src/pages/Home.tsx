@@ -21,7 +21,7 @@ const Home = () => {
       >
         <div className="text-center mb-8">
           <h1 className="text-7xl font-bold mb-4">researchAI</h1>
-          <p className="text-xl">Your AI Paper Research</p>
+          <p className="text-xl">Your AI Paper Research Buddy</p>
         </div>
         
         <div className="grid w-full gap-2">
