@@ -35,14 +35,9 @@ const Home = () => {
         const res = await axios.post('http://127.0.0.1:8000/message', {
           message: message.trim(),
         });
-        //console.log(res.data);
-        
-        // set the response from the backend (for display or further use)
-        setResponse(res.data);
-        console.log(response);
-
-        // clear the message field
-        setMessage('');
+        // Log the response data directly instead of the state
+        console.log("Response data received:", res.data);
+        setResponse(res.data); // This updates the state asynchronously
       } catch (error) {
         console.error("Error sending message to the backend:", error);
       }
@@ -52,19 +47,18 @@ const Home = () => {
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center bg-dark text-white">
       <div
-        className={`w-full max-w-xl px-4 ${
-          isVisible ? 'opacity-100 transition-opacity duration-1000' : 'opacity-0'
-        }`}
+        className={`w-full max-w-xl px-4 ${isVisible ? 'opacity-100 transition-opacity duration-1000' : 'opacity-0'
+          }`}
       >
         <div className="text-center mb-8">
           <h1 className="text-7xl font-bold mb-4">researchAI</h1>
           <p className="text-xl">Your AI Paper Research</p>
         </div>
-        
+
         <div className="relative flex flex-col w-full">
-          <Textarea 
+          <Textarea
             ref={textareaRef}
-            placeholder="Type your message here." 
+            placeholder="Type your message here."
             className="min-h-[52px] max-h-[200px] rounded-3xl pr-14 resize-none overflow-y-auto py-3.5 leading-7"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -76,7 +70,7 @@ const Home = () => {
             }}
             rows={1}
           />
-          <Button 
+          <Button
             className="absolute right-3 bottom-3 h-7 w-7 bg-white rounded-full p-0 hover:bg-slate-700"
             variant="ghost"
             onClick={handleSubmit}
