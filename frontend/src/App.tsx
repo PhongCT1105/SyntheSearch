@@ -1,17 +1,25 @@
-import { useState } from 'react'
-import { Button } from "@/components/ui/button"
-import { SidebarProvider, SidebarTrigger } from './components/ui/sidebar'
-import { AppSidebar } from '@/components/app-sidebar'
-import './App.css'
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { ThemeProvider } from "@/components/theme-provider"; 
+import NavBar from './components/Navbar';
 
-export default function Layout({children}: {children: React.ReactNode}){
+import Home from './pages/Home';
+import About from './pages/About';
+import FeedBack from './pages/Feedback';
+
+function App() {
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <main>
-        <SidebarTrigger />
-        {children}
-      </main>
-    </SidebarProvider>
-  )
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <Router>
+        <NavBar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/feedback" element={<FeedBack />} />
+        </Routes>
+      </Router>
+    </ThemeProvider>
+  );
 }
+
+export default App;
