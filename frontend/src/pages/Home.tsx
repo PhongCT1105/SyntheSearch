@@ -2,11 +2,13 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Textarea } from "@/components/ui/textarea"
 import { ArrowUp } from "lucide-react";
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [message, setMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const navigate = useNavigate()
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -15,7 +17,6 @@ const Home = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Auto-resize textarea
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
@@ -27,15 +28,15 @@ const Home = () => {
   const handleSubmit = () => {
     if (message.trim()) {
       // Handle message submission here
-      console.log(message);
+      navigate('/responds', {state: {message}})
       setMessage('');
     }
   };
 
   return (
-    <div className="w-full h-[80vh] bg-dark text-white flex items-center justify-center">
+    <div className="fixed inset-0 flex flex-col items-center justify-center bg-dark text-white">
       <div
-        className={`w-full max-w-2xl px-4 ${
+        className={`w-full max-w-xl px-4 ${
           isVisible ? 'opacity-100 transition-opacity duration-1000' : 'opacity-0'
         }`}
       >
@@ -48,7 +49,7 @@ const Home = () => {
           <Textarea 
             ref={textareaRef}
             placeholder="Type your message here." 
-            className="min-h-[20px] max-h-[200px] rounded-3xl pr-14 resize-none overflow-y-auto"
+            className="min-h-[52px] max-h-[200px] rounded-3xl pr-14 resize-none overflow-y-auto py-3.5 leading-7"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={(e) => {
@@ -60,7 +61,7 @@ const Home = () => {
             rows={1}
           />
           <Button 
-            className="absolute right-2 bottom-1 h-7 w-7 bg-white rounded-full p-0 hover:bg-slate-700"
+            className="absolute right-3 bottom-3 h-7 w-7 bg-white rounded-full p-0 hover:bg-slate-700"
             variant="ghost"
             onClick={handleSubmit}
           >
