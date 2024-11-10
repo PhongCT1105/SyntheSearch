@@ -1,10 +1,12 @@
+# main.py
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from retrieve import retrieve_top_similar_results
+from synthesis import generate_synthesis
 import logging
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
@@ -18,10 +20,10 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # Allows your React app to make requests
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all HTTP methods
-    allow_headers=["*"],  # Allow all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Load environment variables
@@ -54,6 +56,9 @@ class FullTextRequest(BaseModel):
 class MessageRequest(BaseModel):
     message: str
 
+class SynthesisRequest(BaseModel):
+    full_texts: list[str]
+
 @app.post("/message")
 async def receive_message(request: MessageRequest):
     results = retrieve_top_similar_results(request.message)
@@ -84,3 +89,20 @@ async def generate_summary_suggestions(request: FullTextRequest):
     except Exception as e:
         logging.error(f"Error generating summary or suggestions: {e}")
         return {"error": "Error in summary or suggestion generation"}
+
+@app.post("/generate_synthesis")
+async def generate_synthesis_endpoint(request: SynthesisRequest):
+    """
+    Generate a synthesis paper from multiple research paper texts.
+
+    Args:
+        request (SynthesisRequest): Contains a list of full texts of research papers.
+
+    Returns:
+        dict: A synthesized analysis integrating key points across the research papers.
+    """
+    synthesis_result = generate_synthesis(request.full_texts)
+    if synthesis_result == "Error in synthesis generation.":
+        logging.error("Synthesis generation failed.")
+        return {"error": synthesis_result}
+    return {"synthesis": synthesis_result}
