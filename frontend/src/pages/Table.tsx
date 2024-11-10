@@ -192,19 +192,31 @@ export function ResearchDataTable({ data }: DataTableProps) {
     enableRowSelection: true,
   });
 
+  // const handleSynthesize = async () => {
+  //   const selectedRows = table.getSelectedRowModel().flatRows;
+  //   const selectedTexts = selectedRows.map(row => row.original.metadata["Full Text"]);
+  //   const combinedText = selectedTexts.join("")
+  //   console.log(combinedText)
+  //   try {
+  //     const response = await axios.post("http://127.0.0.1:8000/generate_synthesis", selectedTexts);
+  //     console.log("Synthesize response:", response.data);
+  //   } catch (error) {
+  //     console.error("Error sending selected texts to the API:", error);
+  //   }
+  // };
   const handleSynthesize = async () => {
     const selectedRows = table.getSelectedRowModel().flatRows;
     const selectedTexts = selectedRows.map(row => row.original.metadata["Full Text"]);
-    console.log(selectedTexts)
+    
     try {
-      const response = await axios.post("http://localhost:8000/generate_synthesis", {
-        texts: selectedTexts,
-      });
+      // Wrap selectedTexts in an object with the key 'full_texts'
+      const response = await axios.post("http://127.0.0.1:8000/generate_synthesis", { full_texts: selectedTexts });
       console.log("Synthesize response:", response.data);
     } catch (error) {
       console.error("Error sending selected texts to the API:", error);
     }
   };
+  
 
   return (
     <div className={`transition-opacity duration-700 ${isTableVisible ? "opacity-100" : "opacity-0"} w-full`}>
