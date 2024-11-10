@@ -1,16 +1,4 @@
-// import React from "react";
-// import { View, Text } from "lucide-react";
-
-// const About = () => {
-//     return (
-//         <View>
-//             <Text> Nothing here</Text>
-//         </View>
-//     )
-// }
-
-// export default About
-
+import React from "react";
 
 const About = () => {
   return (
@@ -21,48 +9,59 @@ const About = () => {
           Welcome to our project! We are a team of passionate individuals working together to build something amazing.
         </p>
 
+        {/* About the Project Section */}
         <div className="bg-gray-800 p-6 rounded-lg shadow-lg mb-8">
           <h2 className="text-2xl font-semibold text-indigo-400 mb-4">About the Project</h2>
-          <p className="text-lg">
-            SyntheSearch was born out of a desire to streamline the time-consuming process of literature review.
-            Researchers often spend hours sorting through papers, hoping to find relevant studies. We aimed to simplify this
-            process by building a tool that would intelligently suggest the most relevant research papers and then create a
-            cohesive summary to show how these studies interrelate.
+          <p className="text-lg text-justify">
+            SyntheSearch is a web application designed to streamline the research process for students and researchers by efficiently locating relevant research papers. Researchers often spend hours sifting through papers, hoping to find the studies that best match their interests. SyntheSearch aims to reduce this time by intelligently suggesting the most relevant papers and generating a synthesis to reveal how the studies interrelate, offering users an insightful overview that saves time and enhances understanding.
           </p>
         </div>
 
-        <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
+        {/* Inspiration Section */}
+        <div className="bg-gray-800 p-6 rounded-lg shadow-lg mb-8">
           <h2 className="text-2xl font-semibold text-indigo-400 mb-4">Inspiration</h2>
-          <p className="text-lg">
-            The inspiration for SyntheSearch came from observing the repetitive effort researchers go through to locate
-            relevant papers and piece them together into a coherent narrative. I wanted to design a solution that not only
-            finds relevant documents but also helps synthesize their insights, empowering researchers to focus on understanding
-            rather than searching.
+          <p className="text-lg text-justify">
+            The inspiration for SyntheSearch came from our own experiences as students. Before HackUMass XII, one team member struggled to find research papers on machine-learning applications in cancer detection. This frustration inspired us to develop a more efficient search engine that leverages Large Language Models (LLM) and vector databases to quickly surface relevant research and summarize findings.
           </p>
         </div>
 
+        {/* How We Built the Project Section */}
+        <div className="bg-gray-800 p-6 rounded-lg shadow-lg mb-8">
+          <h2 className="text-2xl font-semibold text-indigo-400 mb-4">How We Built the Project</h2>
+          <p className="text-lg text-justify">
+            We chose Python for the back end because of its extensive frameworks for AI development. Databricks was used to streamline our machine-learning pipeline. Here’s how we approached building SyntheSearch:
+          </p>
+          <ul className="text-lg text-justify list-disc list-inside ml-6">
+            <li><strong>Data Collection:</strong> We scraped data from the CORE collection of open-access research papers.</li>
+            <li><strong>Embedding:</strong> Using LangChain, we implemented OpenAI's text-embedding-3-large model to convert paper texts into vector embeddings.</li>
+            <li><strong>Storage:</strong> We utilized LanceDB as our vector database, storing the embedded vectors for fast retrieval.</li>
+            <li><strong>Summarization and Synthesis:</strong> We employed OpenAI’s gpt-4o-mini model to generate summaries, suggestions, and synthesized insights.</li>
+            <li><strong>Front-end:</strong> We built the user interface using React.JS with a TypeScript template, providing a clean and responsive experience.</li>
+          </ul>
+        </div>
+
+        {/* Team Members Section */}
         <div className="mt-12 space-y-8">
           <h2 className="text-2xl font-semibold text-indigo-400">Team Members</h2>
           <div className="flex flex-wrap justify-center gap-6">
-            <div className="w-72 bg-gray-800 p-6 rounded-lg shadow-md">
-              <h3 className="text-xl font-semibold text-indigo-400">Phong Cao</h3>
-              <p>Team Lead - Backend Developer</p>
-            </div>
-            <div className="w-72 bg-gray-800 p-6 rounded-lg shadow-md">
-              <h3 className="text-xl font-semibold text-indigo-400">Hien Hoang</h3>
-              <p>Backend Developer</p>
-            </div>
-            <div className="w-72 bg-gray-800 p-6 rounded-lg shadow-md">
-              <h3 className="text-xl font-semibold text-indigo-400">Doanh Phung</h3>
-              <p>Frontend Developer</p>
-            </div>
-            <div className="w-72 bg-gray-800 p-6 rounded-lg shadow-md">
-              <h3 className="text-xl font-semibold text-indigo-400">Minh Bui</h3>
-              <p>Frontend Developer</p>
-            </div>
+            {[
+              { name: "Phong Cao", role: "Team Lead - Backend Developer" },
+              { name: "Hien Hoang", role: "Backend Developer" },
+              { name: "Doanh Phung", role: "Frontend Developer" },
+              { name: "Minh Bui", role: "Frontend Developer" }
+            ].map((member, index) => (
+              <div
+                key={index}
+                className="w-72 bg-gray-800 p-6 rounded-lg shadow-md transform transition duration-300 hover:scale-105 hover:bg-gray-700"
+              >
+                <h3 className="text-xl font-semibold text-indigo-400">{member.name}</h3>
+                <p>{member.role}</p>
+              </div>
+            ))}
           </div>
         </div>
 
+        {/* Acknowledgment Section */}
         <div className="mt-12 text-center">
           <p className="text-lg">
             This is our project for HackUMass XII - Thank you for visiting our About page!
@@ -74,5 +73,3 @@ const About = () => {
 };
 
 export default About;
-
-
