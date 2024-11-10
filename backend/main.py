@@ -1,11 +1,9 @@
-# main.py
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from retrieve import retrieve_top_similar_results
 from crawl_data import crawl_data
 from model import create_lance_db
-from synthesis import generate_synthesis
 import logging
 import os
 from dotenv import load_dotenv
@@ -40,17 +38,26 @@ if not OPENAI_API_KEY:
 # Initialize the language model
 llm = ChatOpenAI(model="gpt-4o-mini", api_key=OPENAI_API_KEY)
 
-# Define the prompt templates for summary and suggestions
+# Define the prompt templates for summary, suggestions, and synthesis
 summary_prompt = ChatPromptTemplate.from_messages(
     [("system", "Provide a very brief summary (1-2 sentences) in format 1. Main goals, 2. Methods, 3. Findings:\n\n{context}")]
 )
 suggestions_prompt = ChatPromptTemplate.from_messages(
     [("system", "Generate a few short (2-3 sentences), actionable suggestions for future research based on the author's work:\n\n{context}")]
 )
+synthesis_prompt = ChatPromptTemplate.from_messages(
+    [("system", "Generate a synthesis paper by analyzing and integrating key ideas from multiple research papers. Structure the synthesis in the following format:\n\n"
+                "1. **Introduction** - Briefly introduce the topic, outlining the main research questions and objectives covered in the source papers.\n"
+                "2. **Key Themes and Insights** - Discuss the common themes, methodologies, and findings across the papers, showing how they connect and contribute to the field.\n"
+                "3. **Challenges and Limitations** - Identify shared challenges or limitations found across the research and provide potential solutions or alternative approaches.\n"
+                "4. **Future Directions** - Suggest promising directions for further research, integrating ideas from each paper to show innovative possibilities.\n\n"
+                "Ensure that relevant citations and references are incorporated appropriately to support the synthesis:\n\n{context}")]
+)
 
-# Set up chains for summary and suggestions with output parsers
+# Set up chains for summary, suggestions, and synthesis with output parsers
 summary_chain = summary_prompt | llm | StrOutputParser()
 suggestions_chain = suggestions_prompt | llm | StrOutputParser()
+synthesis_chain = synthesis_prompt | llm | StrOutputParser()
 
 class FullTextRequest(BaseModel):
     full_text: str
@@ -60,6 +67,9 @@ class MessageRequest(BaseModel):
 
 class CategoryInput(BaseModel):
     enteredKeyword: str
+    
+class SynthesisRequest(BaseModel):
+    full_text: str
 
 @app.put("/put-category")
 async def put_category(category: CategoryInput):
@@ -70,9 +80,6 @@ async def put_category(category: CategoryInput):
     crawl_data(category.enteredKeyword)
     create_lance_db()
     return {"message": "raw_data crawled and converted into vectors in LanceDB"}
-
-class SynthesisRequest(BaseModel):
-    full_texts: list[str]
 
 @app.post("/message")
 async def receive_message(request: MessageRequest):
@@ -106,7 +113,8 @@ async def generate_summary_suggestions(request: FullTextRequest):
 @app.post("/generate_synthesis")
 async def generate_synthesis_endpoint(request: SynthesisRequest):
     try:
-        synthesis_result = generate_synthesis(request.full_texts)
+        # Use the synthesis_chain directly with full_text input
+        synthesis_result = synthesis_chain.invoke({"context": request.full_text})
         return {"synthesis": synthesis_result}
     except Exception as e:
         logging.error(f"Error generating synthesis: {e}")
