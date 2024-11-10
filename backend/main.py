@@ -104,10 +104,10 @@ async def generate_summary_suggestions(request: FullTextRequest):
         return {"error": "Error in summary or suggestion generation"}
 
 @app.post("/generate_synthesis")
-async def generate_synthesis_endpoint(request: SynthesisRequest):
+async def generate_synthesis_route(request: SynthesisRequest):
     try:
-        synthesis_result = generate_synthesis(request.full_texts)
-        return {"synthesis": synthesis_result}
+        synthesis = generate_synthesis(request.full_texts)
+        return {"synthesis": synthesis}
     except Exception as e:
         logging.error(f"Error generating synthesis: {e}")
-        return {"error": "Error generating synthesis"}
+        return {"error": "Error in synthesis generation"}
