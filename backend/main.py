@@ -92,17 +92,9 @@ async def generate_summary_suggestions(request: FullTextRequest):
 
 @app.post("/generate_synthesis")
 async def generate_synthesis_endpoint(request: SynthesisRequest):
-    """
-    Generate a synthesis paper from multiple research paper texts.
-
-    Args:
-        request (SynthesisRequest): Contains a list of full texts of research papers.
-
-    Returns:
-        dict: A synthesized analysis integrating key points across the research papers.
-    """
-    synthesis_result = generate_synthesis(request.full_texts)
-    if synthesis_result == "Error in synthesis generation.":
-        logging.error("Synthesis generation failed.")
-        return {"error": synthesis_result}
-    return {"synthesis": synthesis_result}
+    try:
+        synthesis_result = generate_synthesis(request.full_texts)
+        return {"synthesis": synthesis_result}
+    except Exception as e:
+        logging.error(f"Error generating synthesis: {e}")
+        return {"error": "Error generating synthesis"}
