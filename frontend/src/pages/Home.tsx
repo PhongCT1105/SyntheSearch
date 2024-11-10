@@ -56,6 +56,7 @@ const Home = () => {
         setResponse(newResponse);
         console.log(newResponse);
         setMessage('');
+        navigate('/responds', {state: {responseDate: newResponse}})
       } catch (error) {
         console.error("Error sending message to the backend:", error);
       }
