@@ -134,7 +134,7 @@ def crawl_data(query):
     
     # Create a new 'raw_data' directory
     os.makedirs('raw_data', exist_ok=True)  # Ensure raw_data directory exists
-
     articles = get_research_articles(query, num_articles=10)  # Retrieve 10 articles for each query
     for article in articles:
         save_metadata_to_file(article)
+

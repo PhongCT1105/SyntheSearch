@@ -1,23 +1,38 @@
-import React from 'react';
-import { useLocation } from 'react-router-dom';
-import Table from './Table';
+import { useLocation, Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import {ResearchDataTable} from "./Table";
 
-const Responds = () => {
-  const { state } = useLocation();
-  const initialMessage = state?.message || ''; 
+export default function Responds() {
+  const location = useLocation();
+  const [isContentVisible, setIsContentVisible] = useState(false);
+
+  if (!location.state?.responseDate) {
+    return <Navigate to="/" replace />;
+  }
+
+  const papers = location.state.responseDate.results || [];
+
+  useEffect(() => {
+    setIsContentVisible(true);
+  }, []);
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-dark text-white">
-      <div className="w-5/6 max-w-4xl">
-        <div className="text-right mb-4 ml-4">
-          <p className="bg-slate-700 text-white p-3 rounded-xl inline-block max-w-xs leading-6">{initialMessage}</p>
-        </div>
-        <div className="mt-10">
-          <Table /> 
-        </div>
+    <div className="container mx-auto py-6 min-h-screen flex flex-col justify-center">
+      <div
+        className={`font-bold mb-3 transition-opacity duration-700 ${
+          isContentVisible ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        Research Paper
+      </div>
+
+      <div
+        className={`transition-opacity duration-700 ${
+          isContentVisible ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        <ResearchDataTable data={papers} />
       </div>
     </div>
   );
-};
-
-export default Responds;
+}

@@ -1,67 +1,56 @@
-import json
+from pydantic import BaseModel
 import os
+import logging
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+
 # Load environment variables from .env
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+# Check API key
+if not OPENAI_API_KEY:
+    logging.error("OpenAI API key not found. Please set OPENAI_API_KEY in .env file.")
+    raise EnvironmentError("OpenAI API key not found.")
 
 # Initialize the language model
 llm = ChatOpenAI(model="gpt-4o-mini", api_key=OPENAI_API_KEY)
 
 # Define the prompt templates for summary and suggestions
 summary_prompt = ChatPromptTemplate.from_messages(
-    [("system", "Provide a concise, high-level summary in format 1. Main goals, 2. Methods, 3. Findings of this research paper:\n\n{context}")]
+    [("system", "Provide a very brief summary (1-2 sentences) in format 1. Main goals, 2. Methods, 3. Findings:\n\n{context}")]
 )
-
 suggestions_prompt = ChatPromptTemplate.from_messages(
-    [("system", "Analyze this research paper and generate author-like suggestions on how future researchers can extend, improve, or innovate within this field. Include recommendations on addressing challenges, limitations, and unexplored areas that could benefit from further investigation. Focus on practical steps and possible approaches that align with the author's vision:\n\n{context}")]
+    [("system", "Generate a few short(2-3 sentences), actionable suggestions for future research. Focus on 1-2 specific ways to extend or improve this field based on the author's work:\n\n{context}")]
 )
 
 # Set up chains for summary and suggestions with output parsers
 summary_chain = summary_prompt | llm | StrOutputParser()
 suggestions_chain = suggestions_prompt | llm | StrOutputParser()
 
-def generate_summary(full_text):
-    """
-    Generate a concise summary of the research paper.
+# Models for API requests
+class MessageRequest(BaseModel):
+    message: str
 
-    Args:
-        full_text (str): The full text of the research paper.
+class FullTextRequest(BaseModel):
+    full_text: str
 
-    Returns:
-        str: A concise summary of the research paper.
-    """
-    return summary_chain.invoke({"context": full_text})
+# Functions to generate summary and suggestions
+def generate_summary(full_text: str) -> str:
+    try:
+        return summary_chain.invoke({"context": full_text})
+    except Exception as e:
+        logging.error(f"Error generating summary: {e}")
+        return "Error in summary generation."
 
-def generate_suggestions(full_text):
-    """
-    Generate recommendations for other researchers based on the research paper.
-
-    Args:
-        full_text (str): The full text of the research paper.
-
-    Returns:
-        str: Suggestions for further research and improvements.
-    """
-    return suggestions_chain.invoke({"context": full_text})
-
-if __name__ == "__main__":
-    file_path = "article_metadata.json"
-    with open(file_path, "r", encoding="utf-8") as file:
-        article_metadata = json.load(file)
-    
-    full_text = article_metadata.get("Full Text", "")
-
-    # Generate summary and suggestions
-    summary_result = generate_summary(full_text)
-    suggestions_result = generate_suggestions(full_text)
-
-    # Print results
-    print("Concise Summary of the Article:")
-    print(summary_result)
-    print("\nSuggestions for Other Researchers in the Same Field:")
-    print(suggestions_result)
+def generate_suggestions(full_text: str) -> str:
+    try:
+        return suggestions_chain.invoke({"context": full_text})
+    except Exception as e:
+        logging.error(f"Error generating suggestions: {e}")
+        return "Error in suggestion generation."
