@@ -195,11 +195,10 @@ export function ResearchDataTable({ data }: DataTableProps) {
   const handleSynthesize = async () => {
     const selectedRows = table.getSelectedRowModel().flatRows;
     const selectedTexts = selectedRows.map(row => row.original.metadata["Full Text"]);
-    console.log(selectedTexts)
+    const combinedText = selectedTexts.join("")
+    console.log(combinedText)
     try {
-      const response = await axios.post("http://localhost:8000/generate_synthesis", {
-        texts: selectedTexts,
-      });
+      const response = await axios.post("http://127.0.0.1:8000/generate_synthesis", selectedTexts);
       console.log("Synthesize response:", response.data);
     } catch (error) {
       console.error("Error sending selected texts to the API:", error);

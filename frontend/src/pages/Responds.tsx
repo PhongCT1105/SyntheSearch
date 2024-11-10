@@ -19,7 +19,7 @@ export default function Responds() {
   return (
     <div className="container mx-auto py-6 min-h-screen flex flex-col justify-center">
       <div
-        className={`font-bold mb-3 transition-opacity duration-700 ${
+        className={`text-3xl font-bold mb-4 transition-opacity duration-700 ${
           isContentVisible ? "opacity-100" : "opacity-0"
         }`}
       >
