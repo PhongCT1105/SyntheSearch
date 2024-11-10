@@ -12,7 +12,7 @@ export default function Responds() {
   const papers = location.state.responseDate.results || [];
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-auto py-6 min-h-screen flex flex-col justify-center">
       <div className='font-bold mb-3'>
         Research Paper
       </div>

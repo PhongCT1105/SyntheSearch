@@ -76,22 +76,22 @@ export const columns: ColumnDef<ResearchPaper>[] = [
     header: "Authors",
     cell: ({ row }) => <div className="max-h-[100px] overflow-y-auto">{row.original.metadata.Authors}</div>,
   },
-  {
-    accessorKey: "metadata.Abstract",
-    header: "Abstract",
-    cell: ({ row }) => (
-      <div className="max-h-[100px] overflow-y-auto">
-        {row.original.metadata.Abstract}
-      </div>
-    ),
-  },
+  // {
+  //   accessorKey: "metadata.Abstract",
+  //   header: "Abstract",
+  //   cell: ({ row }) => (
+  //     <div className="max-h-[100px] overflow-y-auto">
+  //       {row.original.metadata.Abstract}
+  //     </div>
+  //   ),
+  // },
   {
     accessorKey: "similarity",
-    header: "Similarity",
-    cell: ({ row }) => (
-      <div className="text-right">
-        {(row.original.similarity * 100).toFixed(2)}%
-      </div>
+    header: "",
+    cell: () => (
+        <div className="text-right">
+          <Button variant="outline">View Summary</Button>
+        </div>
     ),
   },
 ]
@@ -159,7 +159,11 @@ export function ResearchDataTable({ data }: DataTableProps) {
           <span>
             {Object.keys(rowSelection).length} of {data.length} row(s) selected.
           </span>
-          <Button>Synthesize</Button>
+
+          {Object.keys(rowSelection).length > 0 && (
+              <Button>Synthesize</Button>
+          )}
+
         </div>
       </div>
     </div>
