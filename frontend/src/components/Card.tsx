@@ -1,5 +1,4 @@
 import * as React from "react"
-
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -11,15 +10,12 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 
-export function CardWithForm() {
+interface CardWithFormProps {
+  onNext: () => void;
+}
+
+export function CardWithForm({onNext}: CardWithFormProps) {
   return (
     <Card className="w-[350px]">
       <CardHeader>
@@ -31,13 +27,13 @@ export function CardWithForm() {
           <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="name">Keyword</Label>
-              <Input id="name" placeholder="Enter the keyword here" />
+              <Input id="keywordInput" placeholder="Enter the keyword here" />
             </div>
           </div>
         </form>
       </CardContent>
       <CardFooter className="flex justify-end">
-        <Button>Next</Button>
+        <Button onClick={onNext}>Next</Button>
       </CardFooter>
     </Card>
   )
