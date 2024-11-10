@@ -123,9 +123,9 @@ def save_metadata_to_file(data):
 
 if __name__ == "__main__":
     os.makedirs('raw_data', exist_ok=True)  # Ensure raw_data directory exists
-    queries = ["Economics", "Cloud Computing"]  # List of queries to search for
+    queries = ["Large Language Model"]  # List of queries to search for
 
     for query in queries:
-        articles = get_research_articles(query, num_articles=10)  # Retrieve 10 articles for each query
+        articles = get_research_articles(query, num_articles=2)  # Retrieve 10 articles for each query
         for article in articles:
             save_metadata_to_file(article)
