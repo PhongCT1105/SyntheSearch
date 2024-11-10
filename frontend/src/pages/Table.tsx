@@ -17,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
 
 interface Metadata {
   Abstract: string;
@@ -64,7 +65,7 @@ export const columns: ColumnDef<ResearchPaper>[] = [
         href={row.original.metadata.Link}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-blue-600 hover:underline"
+        className="text-[#7DA5FC] font-bold hover:underline"
       >
         {row.original.metadata.Title}
       </a>
@@ -154,8 +155,11 @@ export function ResearchDataTable({ data }: DataTableProps) {
         </Table>
       </div>
       <div className="py-4">
-        <div className="text-sm text-muted-foreground">
-          {Object.keys(rowSelection).length} of {data.length} row(s) selected.
+        <div className="text-sm text-muted-foreground flex justify-between items-center">
+          <span>
+            {Object.keys(rowSelection).length} of {data.length} row(s) selected.
+          </span>
+          <Button>Synthesize</Button>
         </div>
       </div>
     </div>

@@ -12,9 +12,10 @@ import { ResearchDataTable } from './pages/Table';
 
 function AppContent() {
   const location = useLocation();
-  
-  // Check if the current route is '/responds'
-  const hideNavBar = location.pathname === '/responds';
+
+  // List of routes where NavBar should be hidden
+  const hideNavBarRoutes = ['/responds'];
+  const hideNavBar = hideNavBarRoutes.includes(location.pathname);
 
   return (
     <div>
