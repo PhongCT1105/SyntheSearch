@@ -3,7 +3,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowUp, AlertCircle } from "lucide-react";
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { CardWithForm } from '@/components/Card';
+import CardWithForm from '@/components/Card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import axios from 'axios';
 
@@ -33,14 +33,19 @@ const Home = () => {
     }
   }, [message]);
 
-  const handleNext = () => {
-    const enteredKeyword = (document.getElementById("keywordInput") as HTMLInputElement).value;
-    if (enteredKeyword.trim()) {
-      setKeyword(enteredKeyword);
-      setIsCardVisible(false);
-      setTimeout(() => {
-        setIsTextAreaVisible(true);
-      }, 300);
+  const handleNext = async () => {
+    if (keyword.trim()) {
+      try {
+        await axios.put('http://127.0.0.1:8000/put-category', { enteredKeyword: keyword.trim() });
+        setIsCardVisible(false);
+        setTimeout(() => {
+          setIsTextAreaVisible(true); // Make the textarea visible
+        }, 300); // Delay to allow card transition
+        setKeyword('');
+      } catch (error) {
+        console.error("Error sending category to the backend:", error);
+        setIsAlertVisible(true);
+      }
     } else {
       setIsAlertVisible(true);
     }
@@ -56,6 +61,7 @@ const Home = () => {
         setResponse(newResponse);
         console.log(newResponse);
         setMessage('');
+        navigate('/responds', {state: {responseDate: newResponse}})
       } catch (error) {
         console.error("Error sending message to the backend:", error);
       }
@@ -80,7 +86,7 @@ const Home = () => {
         <div className={`transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'}`}>
           {isCardVisible && (
             <div className="flex justify-center w-full">
-              <CardWithForm onNext={handleNext} />
+              <CardWithForm keyword={keyword} onNext={handleNext} setKeyword={setKeyword} />
             </div>
           )}
         </div>
@@ -90,7 +96,7 @@ const Home = () => {
           {isTextAreaVisible && (
             <>
               <div className="text-center mb-4">
-                <h3 className="text-2xl font-bold">Describe more about "{keyword}" that you would like to find</h3>
+                <h3 className="text-2xl font-bold">Describe more about the topic</h3>
               </div>
               <div className="relative flex justify-center">
                 <div className="w-[700px] max-w-100 relative">
@@ -115,7 +121,7 @@ const Home = () => {
                   >
                     <ArrowUp className="h-4 w-4 text-black" />
                   </Button>
-                </div>    
+                </div>
               </div>
             </>
           )}
@@ -124,11 +130,11 @@ const Home = () => {
 
       {/* Alert Overlay */}
       {isAlertVisible && (
-        <div 
+        <div
           className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-90 z-50"
           onClick={() => setIsAlertVisible(false)}
         >
-          <div className="p-6 rounded-lg text-black max-w-sm w-full"> 
+          <div className="p-6 rounded-lg text-black max-w-sm w-full">
             <Alert variant="destructive">
               <AlertCircle className='h-4 w-4' />
               <AlertTitle>Error</AlertTitle>

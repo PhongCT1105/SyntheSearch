@@ -3,6 +3,8 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from retrieve import retrieve_top_similar_results
+from crawl_data import crawl_data
+from model import create_lance_db
 from synthesis import generate_synthesis
 import logging
 import os
@@ -56,13 +58,25 @@ class FullTextRequest(BaseModel):
 class MessageRequest(BaseModel):
     message: str
 
+class CategoryInput(BaseModel):
+    enteredKeyword: str
+
+@app.put("/put-category")
+async def put_category(category: CategoryInput):
+    """
+    Call crawl_data() with request message as input.
+    This PUT method does not return a response body.
+    """
+    crawl_data(category.enteredKeyword)
+    create_lance_db()
+    return {"message": "raw_data crawled and converted into vectors in LanceDB"}
+
 class SynthesisRequest(BaseModel):
     full_texts: list[str]
 
 @app.post("/message")
 async def receive_message(request: MessageRequest):
     results = retrieve_top_similar_results(request.message)
-
     # Format results for JSON response (assuming results is a list of tuples)
     formatted_results = [
         {
@@ -77,7 +91,6 @@ async def receive_message(request: MessageRequest):
         }
         for result in results
     ]
-
     return {"results": formatted_results}
 
 @app.post("/generate_summary_suggestions")
@@ -91,10 +104,10 @@ async def generate_summary_suggestions(request: FullTextRequest):
         return {"error": "Error in summary or suggestion generation"}
 
 @app.post("/generate_synthesis")
-async def generate_synthesis_endpoint(request: SynthesisRequest):
+async def generate_synthesis_route(request: SynthesisRequest):
     try:
-        synthesis_result = generate_synthesis(request.full_texts)
-        return {"synthesis": synthesis_result}
+        synthesis = generate_synthesis(request.full_texts)
+        return {"synthesis": synthesis}
     except Exception as e:
         logging.error(f"Error generating synthesis: {e}")
-        return {"error": "Error generating synthesis"}
+        return {"error": "Error in synthesis generation"}

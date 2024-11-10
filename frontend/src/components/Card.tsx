@@ -1,4 +1,3 @@
-import * as React from "react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -12,10 +11,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
 interface CardWithFormProps {
+  keyword: string;
   onNext: () => void;
+  setKeyword: (value: string) => void;
 }
 
-export function CardWithForm({onNext}: CardWithFormProps) {
+function CardWithForm({ keyword, onNext, setKeyword }: CardWithFormProps) {
   return (
     <Card className="w-[350px]">
       <CardHeader>
@@ -27,7 +28,12 @@ export function CardWithForm({onNext}: CardWithFormProps) {
           <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="name">Keyword</Label>
-              <Input id="keywordInput" placeholder="Enter the keyword here" />
+              <Input
+                id="keywordInput"
+                placeholder="Enter the keyword here"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+              />
             </div>
           </div>
         </form>
@@ -38,3 +44,5 @@ export function CardWithForm({onNext}: CardWithFormProps) {
     </Card>
   )
 }
+
+export default CardWithForm;

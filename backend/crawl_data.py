@@ -1,9 +1,9 @@
 import os
 import requests
 import json
-import uuid  # For generating unique random filenames
 import hashlib
 from dotenv import load_dotenv
+import shutil
 
 # Load the environment variables
 load_dotenv()
@@ -121,11 +121,20 @@ def save_metadata_to_file(data):
     else:
         print(f"Duplicate article '{data['Title']}' already exists. Skipping save.")
 
-if __name__ == "__main__":
+def crawl_data(query):
+    """
+    Crawls data for the specified queries by retrieving articles and saving metadata.
+    Args:
+        queries (str): The keyword to search for articles.
+    """
+    # Check if 'raw_data' directory exists
+    if os.path.exists('raw_data'):
+        # Remove existing 'raw_data' directory and its contents
+        shutil.rmtree('raw_data')
+    
+    # Create a new 'raw_data' directory
     os.makedirs('raw_data', exist_ok=True)  # Ensure raw_data directory exists
-    queries = ["Large Language Model"]  # List of queries to search for
+    articles = get_research_articles(query, num_articles=10)  # Retrieve 10 articles for each query
+    for article in articles:
+        save_metadata_to_file(article)
 
-    for query in queries:
-        articles = get_research_articles(query, num_articles=2)  # Retrieve 10 articles for each query
-        for article in articles:
-            save_metadata_to_file(article)
