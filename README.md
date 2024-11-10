@@ -1,2 +1,24 @@
 # HackUMass-XII
-Author: Phong Cao, Hien Hoang, Doanh Phung, Minh Bui
+
+### Authors  
+**Phong Cao, Hien Hoang, Doanh Phung, Minh Bui**
+
+**Start backend server:**
+
+`cd backend`
+
+`python3 -m venv venv`
+
+`source venv/bin/activate`
+
+`pip install -r requirement.txt` (ios => make sure there's no pywin32 in requirement.txt)
+
+`uvicorn main:app --reload`
+
+**Start frontend:**
+
+`cd frontend`
+
+`npm i`
+
+`npm run dev`

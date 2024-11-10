@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import CardWithForm from '@/components/Card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Progress } from '@/components/ui/progress';
 import axios from 'axios';
 
 const Home = () => {
@@ -17,6 +18,10 @@ const Home = () => {
   const [isVisible, setIsVisible] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const navigate = useNavigate();
+
+  const [keywordProgress, setKeywordProgress] = useState(0);
+  const [searchProgress, setSearchProgress] = useState(0);
+  const [isKeywordLoading, setIsKeywordLoading] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -35,9 +40,18 @@ const Home = () => {
 
   const handleNext = async () => {
     if (keyword.trim()) {
+      setIsKeywordLoading(true);
+      setKeywordProgress(0);
+
+      const interval = setInterval(() => {
+        setKeywordProgress(prev => (prev < 90 ? prev + 10 : prev));
+      }, 300);
+
       try {
         await axios.put('http://127.0.0.1:8000/put-category', { enteredKeyword: keyword.trim() });
+        setKeywordProgress(100);
         setIsCardVisible(false);
+
         setTimeout(() => {
           setIsTextAreaVisible(true); // Make the textarea visible
         }, 300); // Delay to allow card transition
@@ -45,7 +59,7 @@ const Home = () => {
       } catch (error) {
         console.error("Error sending category to the backend:", error);
         setIsAlertVisible(true);
-      }
+      } 
     } else {
       setIsAlertVisible(true);
     }
@@ -59,9 +73,12 @@ const Home = () => {
         });
         const newResponse = res.data;
         setResponse(newResponse);
-        console.log(newResponse);
-        setMessage('');
-        navigate('/responds', {state: {responseDate: newResponse}})
+        setSearchProgress(100);
+
+        setTimeout(() => {
+          setMessage('');
+          navigate('/responds', { state: { responseDate: newResponse } });
+        }, 500);
       } catch (error) {
         console.error("Error sending message to the backend:", error);
       }
@@ -74,7 +91,7 @@ const Home = () => {
       <div className={`fixed top-20 left-1/2 transform -translate-x-1/2 w-full max-w-xl px-4 transition-all duration-700 ${isTextAreaVisible ? '' : ''}`}>
         <div className={`transition-opacity duration-700 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
           <div className="text-center">
-            <h1 className="text-7xl font-bold mb-4">researchAI</h1>
+            <h1 className="text-7xl font-bold mb-4">SyntheSearch</h1>
             <p className="text-xl">Your AI Paper Research</p>
           </div>
         </div>
@@ -85,8 +102,14 @@ const Home = () => {
         {/* Card Section */}
         <div className={`transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'}`}>
           {isCardVisible && (
-            <div className="flex justify-center w-full">
+            <div className="flex flex-col items-center w-full gap-4">
               <CardWithForm keyword={keyword} onNext={handleNext} setKeyword={setKeyword} />
+              {isKeywordLoading && (
+                <div className="w-full max-w-md">
+                  <p className="text-sm text-center mt-2">Processing your keyword...</p>
+                  <Progress value={keywordProgress} className="w-full my-4" />
+                </div>
+              )}
             </div>
           )}
         </div>

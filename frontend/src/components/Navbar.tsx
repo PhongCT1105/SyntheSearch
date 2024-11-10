@@ -18,7 +18,7 @@ const NavBar = () => {
         <div className="container mx-auto flex justify-between items-center p-4">
           {/* Website Name */}
           <Link className="text-xl font-bold text-white hover:text-white" to="/" onClick={scrollToTop}>
-            <span className="text-white">research</span><b className="text-white">AI</b>
+            <span className="text-white">Synthe</span><b className="text-white">Search</b>
           </Link>
 
           {/* Mobile Toggle Button - Visible on Mobile Only */}
@@ -36,7 +36,7 @@ const NavBar = () => {
           <div className="hidden lg:flex space-x-8">
             <Link className="text-white hover:text-red-600 transition-colors duration-200" to="/" onClick={scrollToTop}>Home</Link>
             <Link className="text-white hover:text-red-600 transition-colors duration-200" to="/about" onClick={scrollToTop}>About Us</Link>
-            <Link className="text-white hover:text-red-600 transition-colors duration-200" to="/feedback" onClick={scrollToTop}>Feedback</Link>
+            {/* <Link className="text-white hover:text-red-600 transition-colors duration-200" to="/feedback" onClick={scrollToTop}>Feedback</Link> */}
           </div>
         </div>
       </nav>
@@ -64,7 +64,7 @@ const NavBar = () => {
           >
             About Us
           </Link>
-          <Link
+          {/* <Link
             className="block w-full text-right py-2 text-white hover:text-red-600 transition-colors duration-200 px-4"
             to="/feedback"
             onClick={() => {
@@ -73,7 +73,7 @@ const NavBar = () => {
             }}
           >
             Feedback
-          </Link>
+          </Link> */}
         </div>
       )}
     </>
