@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
   ColumnDef,
@@ -28,12 +28,12 @@ interface Metadata {
   "Full Text": string;
 }
 
-interface SummaryData{
-  summary: string,
-  suggestions: string
+interface SummaryData {
+  summary: string;
+  suggestions: string;
 }
 
-const summaryCache: { [link: string]: SummaryData} = {};
+const summaryCache: { [link: string]: SummaryData } = {};
 
 export interface ResearchPaper {
   metadata: Metadata;
@@ -94,12 +94,11 @@ export const columns: ColumnDef<ResearchPaper>[] = [
   },
 ];
 
-
 const SummaryDialog: React.FC<{ fullText: string }> = ({ fullText }) => {
-  const [open, setOpen] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
-  const [summaryData, setSummaryData] = React.useState<SummaryData | null>(null);
-  const [progress, setProgress] = React.useState(0);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [summaryData, setSummaryData] = useState<SummaryData | null>(null);
+  const [progress, setProgress] = useState(0);
 
   const fetchSummarySuggestions = async () => {
     setLoading(true);
@@ -115,8 +114,6 @@ const SummaryDialog: React.FC<{ fullText: string }> = ({ fullText }) => {
       const data: SummaryData = response.data;
       setSummaryData(data);
       setProgress(100);
-
-      // Store in cache
       summaryCache[fullText] = data;
     } catch (error) {
       console.error("Error fetching summary/suggestions:", error);
@@ -127,7 +124,6 @@ const SummaryDialog: React.FC<{ fullText: string }> = ({ fullText }) => {
   };
 
   const handleOpenDialog = () => {
-    // Check if summary is already cached
     if (summaryCache[fullText]) {
       setSummaryData(summaryCache[fullText]);
       setProgress(100);
@@ -171,13 +167,14 @@ const SummaryDialog: React.FC<{ fullText: string }> = ({ fullText }) => {
 };
 
 export function ResearchDataTable({ data }: DataTableProps) {
-  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
-  const [isTableVisible, setIsTableVisible] = React.useState(false);
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [isTableVisible, setIsTableVisible] = useState(false);
+  const [synthesisResult, setSynthesisResult] = useState<string[] | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const timer = setTimeout(() => {
       setIsTableVisible(true);
-    }, 200); // Delay to trigger the fade-in effect
+    }, 200);
     return () => clearTimeout(timer);
   }, []);
 
@@ -192,31 +189,17 @@ export function ResearchDataTable({ data }: DataTableProps) {
     enableRowSelection: true,
   });
 
-  // const handleSynthesize = async () => {
-  //   const selectedRows = table.getSelectedRowModel().flatRows;
-  //   const selectedTexts = selectedRows.map(row => row.original.metadata["Full Text"]);
-  //   const combinedText = selectedTexts.join("")
-  //   console.log(combinedText)
-  //   try {
-  //     const response = await axios.post("http://127.0.0.1:8000/generate_synthesis", selectedTexts);
-  //     console.log("Synthesize response:", response.data);
-  //   } catch (error) {
-  //     console.error("Error sending selected texts to the API:", error);
-  //   }
-  // };
   const handleSynthesize = async () => {
     const selectedRows = table.getSelectedRowModel().flatRows;
-    const selectedTexts = selectedRows.map(row => row.original.metadata["Full Text"]);
-    
+    const selectedTexts = selectedRows.map((row) => row.original.metadata["Full Text"]);
+
     try {
-      // Wrap selectedTexts in an object with the key 'full_texts'
       const response = await axios.post("http://127.0.0.1:8000/generate_synthesis", { full_texts: selectedTexts });
-      console.log("Synthesize response:", response.data);
+      setSynthesisResult(response.data.synthesis.split("\n")); // Splitting for chat-style display
     } catch (error) {
       console.error("Error sending selected texts to the API:", error);
     }
   };
-  
 
   return (
     <div className={`transition-opacity duration-700 ${isTableVisible ? "opacity-100" : "opacity-0"} w-full`}>
@@ -229,10 +212,7 @@ export function ResearchDataTable({ data }: DataTableProps) {
                   <TableHead key={header.id}>
                     {header.isPlaceholder
                       ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                      : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
               </TableRow>
@@ -241,14 +221,9 @@ export function ResearchDataTable({ data }: DataTableProps) {
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
+                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
+                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                   ))}
                 </TableRow>
               ))
@@ -267,14 +242,23 @@ export function ResearchDataTable({ data }: DataTableProps) {
           <span>
             {Object.keys(rowSelection).length} of {data.length} row(s) selected.
           </span>
-          <Button
-            onClick={handleSynthesize}
-            className={Object.keys(rowSelection).length > 0 ? "" : "invisible"}
-          >
+          <Button onClick={handleSynthesize} className={Object.keys(rowSelection).length > 0 ? "" : "invisible"}>
             Synthesize
           </Button>
         </div>
       </div>
+      {synthesisResult && (
+        <div className="mt-6 p-4 bg-gray-100 rounded-md">
+          <h2 className="font-bold mb-4">Chat Synthesis:</h2>
+          <div className="space-y-3">
+            {synthesisResult.map((message, index) => (
+              <div key={index} className={`p-2 rounded-lg ${index % 2 === 0 ? "bg-blue-100" : "bg-gray-200"}`}>
+                <p>{message}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
