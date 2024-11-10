@@ -24,7 +24,7 @@ function CardWithForm({ keyword, onNext, setKeyword }: CardWithFormProps) {
         <CardDescription>Look for research paper in one-click.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form>
+        <form onSubmit={onNext}>
           <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="name">Keyword</Label>

@@ -38,7 +38,8 @@ const Home = () => {
     }
   }, [message]);
 
-  const handleNext = async () => {
+  const handleNext = async (e) => {
+    e.preventDefault();
     if (keyword.trim()) {
       setIsKeywordLoading(true);
       setKeywordProgress(0);
@@ -67,10 +68,17 @@ const Home = () => {
 
   const handleSubmit = async () => {
     if (message.trim()) {
+      setIsKeywordLoading(true);
+      setKeywordProgress(0);
+
+      const interval = setInterval(() => {
+        setKeywordProgress(prev => (prev < 90 ? prev + 10 : prev));
+      }, 300);
       try {
         const res = await axios.post('http://127.0.0.1:8000/message', {
           message: message.trim(),
         });
+        setKeywordProgress(100);
         const newResponse = res.data;
         setResponse(newResponse);
         setSearchProgress(100);
