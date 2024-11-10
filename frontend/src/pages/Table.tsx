@@ -94,6 +94,59 @@ export const columns: ColumnDef<ResearchPaper>[] = [
   },
 ];
 
+function renderMarkdown(message: string) {
+  // Convert headers
+  if (message.startsWith("# ")) {
+    return <h1 className="hidden">{message.replace("# ", "")}</h1>;
+  }
+  if (message.startsWith("## ")) {
+    return <h2 className="text-3xl font-bold mt-8">{message.replace("## ", "")}</h2>;
+  }
+  if (message.startsWith("### ")) {
+    return <h3 className="text-2xl font-bold mt-8">{message.replace("### ", "")}</h3>;
+  }
+  const orderedListItems = message.split("\n").filter(line => line.match(/^\d+\.\s/));
+  if (orderedListItems.length > 1) {
+    const orderedList = orderedListItems.map((line, i) => (
+        <li key={i} className="ml-6 list-decimal">{line.replace(/^\d+\.\s/, "")}</li>
+    ));
+
+    return <ol>{orderedList}</ol>;
+  }
+
+  // Convert bold text
+  if (message.includes("**")) {
+    const boldText = message.split("**").map((segment, i) =>
+        i % 2 === 1 ? (
+            <span key={i} className="font-bold">{segment}</span>
+        ) : (
+            segment
+        )
+    );
+    return <p>{boldText}</p>;
+  }
+
+  // Convert italic text
+  if (message.includes("*") && !message.includes("**")) {
+    const italicText = message.split("*").map((segment, i) =>
+        i % 2 === 1 ? (
+            <span key={i} className="italic">{segment}</span>
+        ) : (
+            segment
+        )
+    );
+    return <p>{italicText}</p>;
+  }
+
+  // Convert list items
+  if (message.startsWith("- ")) {
+    return <li className="ml-4 list-disc">{message.replace("- ", "")}</li>;
+  }
+
+  // Default paragraph
+  return <p>{message}</p>;
+}
+
 const SummaryDialog: React.FC<{ fullText: string }> = ({ fullText }) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -141,7 +194,7 @@ const SummaryDialog: React.FC<{ fullText: string }> = ({ fullText }) => {
         View Summary
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
+        <DialogContent className={"max-w-[800px]"}>
           <DialogHeader>
             <DialogTitle>Summary and Suggestions</DialogTitle>
           </DialogHeader>
@@ -151,14 +204,15 @@ const SummaryDialog: React.FC<{ fullText: string }> = ({ fullText }) => {
               <Progress value={progress} className="w-full my-4" />
             </div>
           ) : summaryData ? (
-            <div className="max-h-[300px] overflow-y-scroll">
-              <h2 className="font-bold">Summary:</h2>
-              <p>{summaryData.summary}</p>
-              <h2 className="font-bold mt-4">Suggestions:</h2>
-              <p>{summaryData.suggestions}</p>
-            </div>
+              <div className="max-h-[80vh] overflow-y-scroll">
+                <h2 className="font-bold text-2xl mb-2">Summary</h2>
+                {renderMarkdown(summaryData.summary)}
+                <h2 className="font-bold mt-4 mb-2 text-2xl">Suggestions</h2>
+                {renderMarkdown(summaryData.suggestions)}
+              </div>
+
           ) : (
-            <p>Error retrieving data</p>
+              <p>Error retrieving data</p>
           )}
         </DialogContent>
       </Dialog>
@@ -166,10 +220,13 @@ const SummaryDialog: React.FC<{ fullText: string }> = ({ fullText }) => {
   );
 };
 
-export function ResearchDataTable({ data }: DataTableProps) {
+export function ResearchDataTable({data}: DataTableProps) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [isTableVisible, setIsTableVisible] = useState(false);
   const [synthesisResult, setSynthesisResult] = useState<string[] | null>(null);
+  const [isSynthesisOpen, setIsSynthesisOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -189,76 +246,106 @@ export function ResearchDataTable({ data }: DataTableProps) {
     enableRowSelection: true,
   });
 
+
   const handleSynthesize = async () => {
     const selectedRows = table.getSelectedRowModel().flatRows;
     const selectedTexts = selectedRows.map((row) => row.original.metadata["Full Text"]);
 
+    setLoading(true);
+    setProgress(0);
+    setIsSynthesisOpen(true);
+    setSynthesisResult(null);
+
+    const interval = setInterval(() => {
+      setProgress((prev) => (prev < 90 ? prev + 10 : prev));
+    }, 500);
+
     try {
       const response = await axios.post("http://127.0.0.1:8000/generate_synthesis", { full_texts: selectedTexts });
-      setSynthesisResult(response.data.synthesis.split("\n")); // Splitting for chat-style display
+      const result = response.data.synthesis.split("\n");
+
+      setSynthesisResult(result);
+      setProgress(100);
     } catch (error) {
       console.error("Error sending selected texts to the API:", error);
+    } finally {
+      clearInterval(interval);
+      setLoading(false);
     }
   };
 
+
+
   return (
-    <div className={`transition-opacity duration-700 ${isTableVisible ? "opacity-100" : "opacity-0"} w-full`}>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      <div className="py-4">
-        <div className="text-sm text-muted-foreground flex justify-between items-center">
+      <div className={`transition-opacity duration-700 ${isTableVisible ? "opacity-100" : "opacity-0"} w-full`}>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                        <TableHead key={header.id}>
+                          {header.isPlaceholder
+                              ? null
+                              : flexRender(header.column.columnDef.header, header.getContext())}
+                        </TableHead>
+                    ))}
+                  </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                      <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                        {row.getVisibleCells().map((cell) => (
+                            <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                        ))}
+                      </TableRow>
+                  ))
+              ) : (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="h-24 text-center">
+                      No results.
+                    </TableCell>
+                  </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+        <div className="py-4">
+          <div className="text-sm text-muted-foreground flex justify-between items-center">
           <span>
             {Object.keys(rowSelection).length} of {data.length} row(s) selected.
           </span>
-          <Button onClick={handleSynthesize} className={Object.keys(rowSelection).length > 0 ? "" : "invisible"}>
-            Synthesize
-          </Button>
-        </div>
-      </div>
-      {synthesisResult && (
-        <div className="mt-6 p-4 bg-gray-100 rounded-md">
-          <h2 className="font-bold mb-4">Chat Synthesis:</h2>
-          <div className="space-y-3">
-            {synthesisResult.map((message, index) => (
-              <div key={index} className={`p-2 rounded-lg ${index % 2 === 0 ? "bg-blue-100" : "bg-gray-200"}`}>
-                <p>{message}</p>
-              </div>
-            ))}
+            <Button onClick={handleSynthesize} className={Object.keys(rowSelection).length > 0 ? "" : "invisible"}>
+              Synthesize
+            </Button>
           </div>
         </div>
-      )}
-    </div>
+        <Dialog open={isSynthesisOpen} onOpenChange={setIsSynthesisOpen}>
+          <DialogContent className={"max-w-[800px]"}>
+            <DialogHeader>
+              <DialogTitle>Synthesis Result</DialogTitle>
+            </DialogHeader>
+            {loading ? (
+                <div>
+                  <p>Generating synthesis, please wait...</p>
+                  <Progress value={progress} className="w-full my-4" />
+                </div>
+            ) : synthesisResult ? (
+                <div className="space-y-3 h-[80vh] overflow-y-scroll">
+                  {synthesisResult.map((message, index) => (
+                      <div key={index} className="">
+                        {renderMarkdown(message)}
+                      </div>
+                  ))}
+                </div>
+
+            ) : (
+                <p>Error retrieving synthesis data</p>
+            )}
+          </DialogContent>
+        </Dialog>
+      </div>
   );
 }
