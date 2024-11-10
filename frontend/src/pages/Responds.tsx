@@ -1,23 +1,26 @@
-import React from 'react';
-import { useLocation } from 'react-router-dom';
-import Table from './Table';
+import { useLocation, Navigate } from 'react-router-dom';
+import { ResearchDataTable } from './Table';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-const Responds = () => {
-  const { state } = useLocation();
-  const initialMessage = state?.message || ''; 
+export default function Responds() {
+  const location = useLocation();
+  
+  if (!location.state?.responseDate) {
+    return <Navigate to="/" replace />;
+  }
+
+  const papers = location.state.responseDate.results || [];
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-dark text-white">
-      <div className="w-5/6 max-w-4xl">
-        <div className="text-right mb-4 ml-4">
-          <p className="bg-slate-700 text-white p-3 rounded-xl inline-block max-w-xs leading-6">{initialMessage}</p>
-        </div>
-        <div className="mt-10">
-          <Table /> 
-        </div>
-      </div>
+    <div className="container mx-auto py-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Research Papers</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResearchDataTable data={papers} />
+        </CardContent>
+      </Card>
     </div>
   );
-};
-
-export default Responds;
+}

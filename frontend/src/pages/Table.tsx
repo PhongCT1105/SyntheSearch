@@ -1,86 +1,160 @@
-import React, { useState, useEffect } from 'react';
+"use client"
+
+import * as React from "react"
 import {
-  Table as UiTable,
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+  RowSelectionState,
+} from "@tanstack/react-table"
+import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { PDFDocument, StandardFonts } from 'pdf-lib';
+} from "@/components/ui/table"
 
-interface Paper {
-  Title: string;
-  Authors: string;
-  Year: string;
+interface Metadata {
   Abstract: string;
-  Keywords: string;
-  Publisher: string;
-  "Publication Date": string;
-  Journal: string;
-  "Citation Count": number;
-  FullText: string;
+  Authors: string;
+  Link: string;
+  Title: string;
 }
 
-import paperData from '../../article_metadata.json';
-import { Button } from '@/components/ui/button';
+export interface ResearchPaper {
+  metadata: Metadata;
+  similarity: number;
+}
 
-const Table = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+export interface DataTableProps {
+  data: ResearchPaper[];
+}
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setPdfUrl(null);
-  };
+export const columns: ColumnDef<ResearchPaper>[] = [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={table.getIsAllPageRowsSelected()}
+        onCheckedChange={(value) => table.toggleAllRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+  },
+  {
+    accessorKey: "metadata.Title",
+    header: "Title",
+    cell: ({ row }) => (
+      <a
+        href={row.original.metadata.Link}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-600 hover:underline"
+      >
+        {row.original.metadata.Title}
+      </a>
+    ),
+  },
+  {
+    accessorKey: "metadata.Authors",
+    header: "Authors",
+    cell: ({ row }) => <div className="max-h-[100px] overflow-y-auto">{row.original.metadata.Authors}</div>,
+  },
+  {
+    accessorKey: "metadata.Abstract",
+    header: "Abstract",
+    cell: ({ row }) => (
+      <div className="max-h-[100px] overflow-y-auto">
+        {row.original.metadata.Abstract}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "similarity",
+    header: "Similarity",
+    cell: ({ row }) => (
+      <div className="text-right">
+        {(row.original.similarity * 100).toFixed(2)}%
+      </div>
+    ),
+  },
+]
+
+export function ResearchDataTable({ data }: DataTableProps) {
+  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({})
+
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    onRowSelectionChange: setRowSelection,
+    state: {
+      rowSelection,
+    },
+    enableRowSelection: true,
+  })
 
   return (
-    <div>
-      <UiTable className='w-[780px]'>
-        <TableCaption>Research Paper Summary</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead className='w-[300px]'>Title</TableHead>
-            <TableHead className='w-[200px]'>Authors</TableHead>
-            <TableHead>Publication Date</TableHead>
-            <TableHead>Action</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <TableRow>
-            <TableCell>{paperData.Title}</TableCell>
-            <TableCell>{paperData.Authors}</TableCell>
-            <TableCell>{paperData.Year}</TableCell>
-            <TableCell className='w-[100px]'>
-              <Button>View Summarize </Button>
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </UiTable>
-
-      {/* Modal */}
-      {isModalOpen && pdfUrl && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-3xl w-full h-full h-96 overflow-hidden relative">
-            <button
-              onClick={closeModal}
-              className="absolute top-2 right-2 text-xl text-gray-500 hover:text-gray-800 focus:outline-none"
-              style={{ background: 'none', border: 'none', padding: 0 }}
-            >
-              ✖
-            </button>
-            <h2 className="text-2xl mb-4">Research Paper PDF</h2>
-            <iframe
-              src={pdfUrl}
-              title="Research Paper PDF"
-              className="w-full h-full"
-            />
-          </div>
+    <div className="w-full">
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow 
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      <div className="py-4">
+        <div className="text-sm text-muted-foreground">
+          {Object.keys(rowSelection).length} of {data.length} row(s) selected.
         </div>
-      )}
+      </div>
     </div>
-  );
-};
-
-export default Table;
+  )
+}

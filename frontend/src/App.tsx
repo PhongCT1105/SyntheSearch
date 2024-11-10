@@ -7,7 +7,7 @@ import Home from './pages/Home';
 import About from './pages/About';
 import FeedBack from './pages/Feedback';
 import Responds from './pages/Responds';
-import Table from './pages/Table';
+import { ResearchDataTable } from './pages/Table';
 // import ModalDetail from './pages/ModalDetail';
 
 function AppContent() {
@@ -24,7 +24,7 @@ function AppContent() {
         <Route path="/about" element={<About />} />
         <Route path="/feedback" element={<FeedBack />} />
         <Route path="/responds" element={<Responds />} />
-        <Route path="/table" element={<Table />} />
+        <Route path="/table" element={<ResearchDataTable />} />
         {/* <Route path="/modal" element={<ModalDetail />} /> */}
       </Routes>
     </div>
