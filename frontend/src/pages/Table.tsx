@@ -28,6 +28,13 @@ interface Metadata {
   "Full Text": string;
 }
 
+interface SummaryData{
+  summary: string,
+  suggestions: string
+}
+
+const summaryCache: { [link: string]: SummaryData} = {};
+
 export interface ResearchPaper {
   metadata: Metadata;
   similarity: number;
@@ -87,10 +94,11 @@ export const columns: ColumnDef<ResearchPaper>[] = [
   },
 ];
 
+
 const SummaryDialog: React.FC<{ fullText: string }> = ({ fullText }) => {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
-  const [summaryData, setSummaryData] = React.useState<{ summary: string; suggestions: string } | null>(null);
+  const [summaryData, setSummaryData] = React.useState<SummaryData | null>(null);
   const [progress, setProgress] = React.useState(0);
 
   const fetchSummarySuggestions = async () => {
@@ -104,8 +112,12 @@ const SummaryDialog: React.FC<{ fullText: string }> = ({ fullText }) => {
 
     try {
       const response = await axios.post("http://localhost:8000/generate_summary_suggestions", { full_text: fullText });
-      setSummaryData(response.data);
+      const data: SummaryData = response.data;
+      setSummaryData(data);
       setProgress(100);
+
+      // Store in cache
+      summaryCache[fullText] = data;
     } catch (error) {
       console.error("Error fetching summary/suggestions:", error);
     } finally {
@@ -114,9 +126,22 @@ const SummaryDialog: React.FC<{ fullText: string }> = ({ fullText }) => {
     }
   };
 
+  const handleOpenDialog = () => {
+    // Check if summary is already cached
+    if (summaryCache[fullText]) {
+      setSummaryData(summaryCache[fullText]);
+      setProgress(100);
+      setLoading(false);
+    } else {
+      setSummaryData(null);
+      fetchSummarySuggestions();
+    }
+    setOpen(true);
+  };
+
   return (
     <>
-      <Button variant="outline" onClick={() => { setOpen(true); fetchSummarySuggestions(); }}>
+      <Button variant="outline" onClick={handleOpenDialog}>
         View Summary
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
@@ -130,7 +155,7 @@ const SummaryDialog: React.FC<{ fullText: string }> = ({ fullText }) => {
               <Progress value={progress} className="w-full my-4" />
             </div>
           ) : summaryData ? (
-            <div>
+            <div className="max-h-[300px] overflow-y-scroll">
               <h2 className="font-bold">Summary:</h2>
               <p>{summaryData.summary}</p>
               <h2 className="font-bold mt-4">Suggestions:</h2>
@@ -147,6 +172,14 @@ const SummaryDialog: React.FC<{ fullText: string }> = ({ fullText }) => {
 
 export function ResearchDataTable({ data }: DataTableProps) {
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
+  const [isTableVisible, setIsTableVisible] = React.useState(false);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsTableVisible(true);
+    }, 200); // Delay to trigger the fade-in effect
+    return () => clearTimeout(timer);
+  }, []);
 
   const table = useReactTable({
     data,
@@ -174,7 +207,7 @@ export function ResearchDataTable({ data }: DataTableProps) {
   };
 
   return (
-    <div className="w-full">
+    <div className={`transition-opacity duration-700 ${isTableVisible ? "opacity-100" : "opacity-0"} w-full`}>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
