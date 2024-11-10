@@ -10,7 +10,7 @@ load_dotenv()
 
 # Set the CORE API key from .env file
 CORE_API_KEY = os.getenv('CORE_API_KEY')
-BASE_URL = 'https://api.core.ac.uk/v3'
+BASE_URL = os.getenv('CORE_API_URL')
 
 def fetch_data(endpoint, params=None):
     """
