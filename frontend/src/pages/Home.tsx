@@ -91,7 +91,7 @@ const Home = () => {
       <div className={`fixed top-20 left-1/2 transform -translate-x-1/2 w-full max-w-xl px-4 transition-all duration-700 ${isTextAreaVisible ? '' : ''}`}>
         <div className={`transition-opacity duration-700 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
           <div className="text-center">
-            <h1 className="text-7xl font-bold mb-4">syntheSearch</h1>
+            <h1 className="text-7xl font-bold mb-4">SyntheSearch</h1>
             <p className="text-xl">Your AI Paper Research</p>
           </div>
         </div>
