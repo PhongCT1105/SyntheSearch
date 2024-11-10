@@ -13,14 +13,10 @@ export default function Responds() {
 
   return (
     <div className="container mx-auto py-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Research Papers</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ResearchDataTable data={papers} />
-        </CardContent>
-      </Card>
+      <div className='font-bold mb-3'>
+        Research Paper
+      </div>
+      <ResearchDataTable data={papers} />
     </div>
   );
 }
