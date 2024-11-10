@@ -1,4 +1,5 @@
 import * as React from "react";
+import axios from "axios";
 import {
   ColumnDef,
   flexRender,
@@ -6,6 +7,7 @@ import {
   useReactTable,
   RowSelectionState,
 } from "@tanstack/react-table";
+import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
@@ -17,8 +19,6 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-// import { Loader } from "@/components/ui/loader";  // Spinner component
-import axios from "axios";
 
 interface Metadata {
   Abstract: string;
@@ -41,21 +41,21 @@ export const columns: ColumnDef<ResearchPaper>[] = [
   {
     id: "select",
     header: ({ table }) => (
-        <Checkbox
-            checked={
-                table.getIsAllPageRowsSelected() ||
-                (table.getIsSomePageRowsSelected() && 'indeterminate')
-            }
-            onCheckedChange={(value) => table.toggleAllRowsSelected(!!value)}
-            aria-label="Select all"
-        />
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllRowsSelected(!!value)}
+        aria-label="Select all"
+      />
     ),
     cell: ({ row }) => (
-        <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
-            aria-label="Select row"
-        />
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
     ),
     enableSorting: false,
   },
@@ -63,20 +63,22 @@ export const columns: ColumnDef<ResearchPaper>[] = [
     accessorKey: "metadata.Title",
     header: "Title",
     cell: ({ row }) => (
-        <a
-            href={row.original.metadata.Link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[#7DA5FC] font-bold hover:underline"
-        >
-          {row.original.metadata.Title}
-        </a>
+      <a
+        href={row.original.metadata.Link}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-[#7DA5FC] font-bold hover:underline"
+      >
+        {row.original.metadata.Title}
+      </a>
     ),
   },
   {
     accessorKey: "metadata.Authors",
     header: "Authors",
-    cell: ({ row }) => <div className="max-h-[100px] overflow-y-auto">{row.original.metadata.Authors}</div>,
+    cell: ({ row }) => (
+      <div className="max-h-[100px] overflow-y-auto">{row.original.metadata.Authors}</div>
+    ),
   },
   {
     accessorKey: "similarity",
@@ -89,45 +91,57 @@ const SummaryDialog: React.FC<{ fullText: string }> = ({ fullText }) => {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [summaryData, setSummaryData] = React.useState<{ summary: string; suggestions: string } | null>(null);
+  const [progress, setProgress] = React.useState(0);
 
   const fetchSummarySuggestions = async () => {
     setLoading(true);
+    setProgress(0);
     setSummaryData(null);
+
+    const interval = setInterval(() => {
+      setProgress((prev) => (prev < 90 ? prev + 10 : prev));
+    }, 500);
+
     try {
       const response = await axios.post("http://localhost:8000/generate_summary_suggestions", { full_text: fullText });
       setSummaryData(response.data);
+      setProgress(100);
     } catch (error) {
       console.error("Error fetching summary/suggestions:", error);
+    } finally {
+      clearInterval(interval);
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
-      <>
-        <Button variant="outline" onClick={() => { setOpen(true); fetchSummarySuggestions(); }}>
-          View Summary
-        </Button>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Summary and Suggestions</DialogTitle>
-            </DialogHeader>
-            {loading ? (
-                <div>HAHAHHAHA</div>
-                // <Loader className="mx-auto my-4" />  // Loading spinner
-            ) : summaryData ? (
-                <div>
-                  <h2 className="font-bold">Summary:</h2>
-                  <p>{summaryData.summary}</p>
-                  <h2 className="font-bold mt-4">Suggestions:</h2>
-                  <p>{summaryData.suggestions}</p>
-                </div>
-            ) : (
-                <p>Error retrieving data</p>
-            )}
-          </DialogContent>
-        </Dialog>
-      </>
+    <>
+      <Button variant="outline" onClick={() => { setOpen(true); fetchSummarySuggestions(); }}>
+        View Summary
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Summary and Suggestions</DialogTitle>
+          </DialogHeader>
+          {loading ? (
+            <div>
+              <p>Generating summary, please wait...</p>
+              <Progress value={progress} className="w-full my-4" />
+            </div>
+          ) : summaryData ? (
+            <div>
+              <h2 className="font-bold">Summary:</h2>
+              <p>{summaryData.summary}</p>
+              <h2 className="font-bold mt-4">Suggestions:</h2>
+              <p>{summaryData.suggestions}</p>
+            </div>
+          ) : (
+            <p>Error retrieving data</p>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
@@ -160,62 +174,62 @@ export function ResearchDataTable({ data }: DataTableProps) {
   };
 
   return (
-      <div className="w-full">
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                        <TableHead key={header.id}>
-                          {header.isPlaceholder
-                              ? null
-                              : flexRender(
-                                  header.column.columnDef.header,
-                                  header.getContext()
-                              )}
-                        </TableHead>
-                    ))}
-                  </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map((row) => (
-                      <TableRow
-                          key={row.id}
-                          data-state={row.getIsSelected() && "selected"}
-                      >
-                        {row.getVisibleCells().map((cell) => (
-                            <TableCell key={cell.id}>
-                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                            </TableCell>
-                        ))}
-                      </TableRow>
-                  ))
-              ) : (
-                  <TableRow>
-                    <TableCell colSpan={columns.length} className="h-24 text-center">
-                      No results.
+    <div className="w-full">
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
-                  </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-        <div className="py-4">
-          <div className="text-sm text-muted-foreground flex justify-between items-center">
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      <div className="py-4">
+        <div className="text-sm text-muted-foreground flex justify-between items-center">
           <span>
             {Object.keys(rowSelection).length} of {data.length} row(s) selected.
           </span>
-            <Button
-                onClick={handleSynthesize}
-                className={Object.keys(rowSelection).length > 0 ? '' : 'invisible'}
-            >
-              Synthesize
-            </Button>
-          </div>
+          <Button
+            onClick={handleSynthesize}
+            className={Object.keys(rowSelection).length > 0 ? "" : "invisible"}
+          >
+            Synthesize
+          </Button>
         </div>
       </div>
+    </div>
   );
 }
