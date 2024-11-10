@@ -159,10 +159,9 @@ export function ResearchDataTable({ data }: DataTableProps) {
           <span>
             {Object.keys(rowSelection).length} of {data.length} row(s) selected.
           </span>
-
-          {Object.keys(rowSelection).length > 0 && (
-              <Button>Synthesize</Button>
-          )}
+          <Button className={Object.keys(rowSelection).length > 0 ? '' : 'invisible'}>
+            Synthesize
+          </Button>
 
         </div>
       </div>
