@@ -14,7 +14,7 @@ function AppContent() {
   const location = useLocation();
 
   // List of routes where NavBar should be hidden
-  const hideNavBarRoutes = ['/responds'];
+  const hideNavBarRoutes = [''];
   const hideNavBar = hideNavBarRoutes.includes(location.pathname);
 
   return (

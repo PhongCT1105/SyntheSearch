@@ -18,7 +18,7 @@ const NavBar = () => {
         <div className="container mx-auto flex justify-between items-center p-4">
           {/* Website Name */}
           <Link className="text-xl font-bold text-white hover:text-white" to="/" onClick={scrollToTop}>
-            <span className="text-white">research</span><b className="text-white">AI</b>
+            <span className="text-white">synthe</span><b className="text-white">Search</b>
           </Link>
 
           {/* Mobile Toggle Button - Visible on Mobile Only */}
