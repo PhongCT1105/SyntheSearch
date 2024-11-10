@@ -5,6 +5,8 @@
 
 **Start backend server:**
 
+`cd backend`
+
 `python3 -m venv venv`
 
 `source venv/bin/activate`
@@ -14,6 +16,8 @@
 `uvicorn main:app --reload`
 
 **Start frontend:**
+
+`cd frontend`
 
 `npm i`
 
