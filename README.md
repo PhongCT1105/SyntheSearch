@@ -1,9 +1,9 @@
-# HackUMass-XII
+# SyntheSearch
 
 ### Authors  
 **Phong Cao, Hien Hoang, Doanh Phung, Minh Bui**
 
-**Start backend server:**
+**Start server (backend):**
 
 `cd backend`
 
@@ -15,7 +15,7 @@
 
 `uvicorn main:app --reload`
 
-**Start frontend:**
+**Start client (frontend):**
 
 `cd frontend`
 
