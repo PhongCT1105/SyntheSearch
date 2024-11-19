@@ -83,17 +83,6 @@ We chose Python for the back end because of its extensive frameworks for AI deve
 
 ---
 
-## **Challenges Faced**
-- **GitHub Workflow Issues**: Frequent pull request conflicts slowed our progress due to merge conflicts.
-- **Communication Gaps**: Miscommunication led to duplicated work and inefficiencies.
-
----
-
-## **Lessons Learned**
-This project was an invaluable learning experience. As it was our first LLM project, we gained hands-on experience with GenAI technologies, particularly the power of vector databases. We learned the importance of clear team communication, and we now have a deeper understanding of LLMs and their capabilities in revolutionizing information retrieval.
-
----
-
 ## **Built With**
 - **Python** (Backend Development)
 - **LangChain** (Embedding)
