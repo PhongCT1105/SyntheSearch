@@ -3,10 +3,10 @@
 
 ### 🖋️ Authors
 
-- **Lead Project / Backend / AI Devloper:** Phong Cao
-- **Backend:** Hien Hoang, Doanh Phung, Minh Bui
+- **Lead Project:** Phong Cao
+- **AI Developer:** Phong Cao
+- **Backend:** Phong Cao, Hien Hoang
 - **Frontend:** Doanh Phung, Minh Bui
-
 
 ---
 
