@@ -1,8 +1,12 @@
 
 # 🕵️‍♂️ SyntheSearch
 
-### 🖋️ Authors  
-**Phong Cao, Hien Hoang, Doanh Phung, Minh Bui**
+### 🖋️ Authors
+
+- **Lead Project / Backend / AI Devloper:** Phong Cao
+- **Backend:** Hien Hoang, Doanh Phung, Minh Bui
+- **Frontend:** Doanh Phung, Minh Bui
+
 
 ---
 
